@@ -11,15 +11,32 @@ app.get("/", function(req, res) {
   res.send("Hello World!");
 });
 
+let events = [];
 app.use(
   "/graphql",
   graphqlHTTP({
     schema: buildSchema(`
+
+    type Event{
+      _id:ID
+      title:String!
+      description:String!
+      price:Float!
+      date:String!
+
+    }
+
+    input EventInput{
+      title:String!
+      description:String!
+      price:Float!
+      date:String!
+    }
     type RootQuery{
-        events:[String!]!
+        events:[Event!]!
     }
     type RootMutation{
-        createEvent(name:String):String
+        createEvent(eventInput:EventInput):Event
     }
     schema{
         query:RootQuery,
@@ -27,9 +44,22 @@ app.use(
     }
     `),
     rootValue: {
-      events: () => ["Academind", "sir", "guru"],
+      events: () => events,
 
-      createEvent: args => `name is ${args.name}`
+      createEvent: args => {
+        let { eventInput } = args;
+
+        let event = JSON.parse(JSON.stringify(eventInput));
+        event._id = Math.random().toString();
+        /*  not working
+        let event = {
+          ...eventInput,
+          _id: Math.random().toString()
+        }; */
+        console.log(eventInput, event);
+        events.push(event);
+        return event;
+      }
     },
     graphiql: true
   })
