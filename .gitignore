@@ -3,3 +3,6 @@ node_modules/
 **/node_modules/
 
 help.git.txt
+
+**/env.js
+**/nodemon.json

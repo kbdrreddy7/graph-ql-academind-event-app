@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js --exec babel-node --presets babel-preset-env"
+    "start": "nodemon  app.js "
   },
   "author": "",
   "license": "ISC",
@@ -13,11 +13,10 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
-    "graphql": "^14.4.2"
+    "graphql": "^14.4.2",
+    "mongoose": "^5.6.9"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
     "nodemon": "^1.19.1"
   }
 }

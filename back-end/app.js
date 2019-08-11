@@ -1,7 +1,21 @@
+/*
+ import "./env";
 import express from "express";
 import cors from "cors";
 import { buildSchema } from "graphql";
 import graphqlHTTP from "express-graphql";
+import mongoose from "mongoose";
+
+import Event from "./models/event";
+ */
+require("./env");
+const express = require("express");
+const cors = require("cors");
+const buildSchema = require("graphql").buildSchema;
+const graphqlHTTP = require("express-graphql");
+const mongoose = require("mongoose");
+
+const Event = require("./models/event");
 
 const app = express();
 
@@ -11,7 +25,6 @@ app.get("/", function(req, res) {
   res.send("Hello World!");
 });
 
-let events = [];
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -23,7 +36,6 @@ app.use(
       description:String!
       price:Float!
       date:String!
-
     }
 
     input EventInput{
@@ -44,28 +56,57 @@ app.use(
     }
     `),
     rootValue: {
-      events: () => events,
+      events: () => {
+        return Event.find({})
+          .then(collection => {
+            return collection.map(docRef => {
+              return { ...docRef._doc, _id: docRef._doc._id.toString() };
+            });
+          })
+          .catch(err => {
+            throw err;
+          });
+      },
 
       createEvent: args => {
         let { eventInput } = args;
 
-        let event = JSON.parse(JSON.stringify(eventInput));
-        event._id = Math.random().toString();
-        /*  not working
+        //let event = JSON.parse(JSON.stringify(eventInput));
+        // event._id = Math.random().toString();
+        /*  
         let event = {
           ...eventInput,
           _id: Math.random().toString()
         }; */
-        console.log(eventInput, event);
-        events.push(event);
-        return event;
+
+        let event = new Event({
+          title: eventInput.title,
+          description: eventInput.description,
+          price: +eventInput.price,
+          date: new Date(eventInput.date)
+        });
+
+        return event
+          .save()
+          .then(docRef => {
+            return { ...docRef._doc, _id: docRef.id };
+          })
+          .catch(err => {
+            throw err;
+          });
       }
     },
     graphiql: true
   })
 );
 
-let PORT = 5000;
-app.listen(PORT, function() {
-  console.log("Example app listening on port ", PORT);
-});
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true })
+  .then(() => {
+    app.listen(process.env.PORT, function() {
+      console.log(" app listening on port ", process.env.PORT);
+    });
+  })
+  .catch(err => {
+    console.log(" err ", err);
+  });

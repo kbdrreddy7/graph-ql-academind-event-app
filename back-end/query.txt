@@ -29,3 +29,33 @@ per lession
                         description
                         }
         }
+
+
+
+lession5
+####################################################
+
+mutation
+{
+  createEvent(
+    eventInput:{
+      					title:"academind",
+      					description:" from gql tool",
+      					price:99.9,
+      					date:"2019-08-11T05:57:53.995Z"
+		})
+    {
+      _id
+    title
+    }
+}
+
+-------------------------------------
+
+{
+  events{
+    _id
+    title
+  }
+}
+
