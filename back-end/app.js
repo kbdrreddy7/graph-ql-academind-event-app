@@ -14,8 +14,10 @@ const cors = require("cors");
 const buildSchema = require("graphql").buildSchema;
 const graphqlHTTP = require("express-graphql");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const Event = require("./models/event");
+const User = require("./models/user");
 
 const app = express();
 
@@ -37,18 +39,30 @@ app.use(
       price:Float!
       date:String!
     }
-
     input EventInput{
       title:String!
       description:String!
       price:Float!
       date:String!
     }
+
+    type User{
+      _id:ID
+      email:String!
+      password:String
+    }
+ input UserInput{
+      email:String!
+      password:String!
+    }
+   
     type RootQuery{
         events:[Event!]!
     }
     type RootMutation{
         createEvent(eventInput:EventInput):Event
+        createUser(userInput:UserInput):User
+
     }
     schema{
         query:RootQuery,
@@ -83,13 +97,50 @@ app.use(
           title: eventInput.title,
           description: eventInput.description,
           price: +eventInput.price,
-          date: new Date(eventInput.date)
+          date: new Date(eventInput.date),
+          creator: "5d4fc0f73ace5c2e22e4f944"
         });
 
+        let createdEvent;
         return event
           .save()
-          .then(docRef => {
-            return { ...docRef._doc, _id: docRef.id };
+          .then(eventRef => {
+            createdEvent = { ...eventRef._doc, _id: eventRef.id };
+            return User.findById("5d4fc0f73ace5c2e22e4f944");
+          })
+          .then(user => {
+            if (!user) throw Error("User not found");
+
+            user.createdEvents.push(event);
+            return user.save();
+          })
+          .then(userRef => {
+            // return { ...userRef._doc, _id: userRef.id };
+            return createdEvent;
+          })
+          .catch(err => {
+            throw err;
+          });
+      },
+      createUser: args => {
+        let { userInput } = args;
+
+        return User.findOne({ email: userInput.email })
+          .then(result => {
+            if (result) throw new Error(" User already exist");
+            // string and salt rounds
+            return bcrypt.hash(userInput.password, 12);
+          })
+          .then(hashedPassword => {
+            let user = new User({
+              email: userInput.email,
+              password: hashedPassword
+            });
+
+            return user.save();
+          })
+          .then(userRef => {
+            return { ...userRef._doc, password: null, _id: userRef.id };
           })
           .catch(err => {
             throw err;
@@ -102,11 +153,9 @@ app.use(
 
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true })
-  .then(() => {
-    app.listen(process.env.PORT, function() {
-      console.log(" app listening on port ", process.env.PORT);
-    });
-  })
-  .catch(err => {
-    console.log(" err ", err);
-  });
+  .then(() =>
+    app.listen(process.env.PORT, () =>
+      console.log(" app listening on port ", process.env.PORT)
+    )
+  )
+  .catch(err => console.log(" err ", err));

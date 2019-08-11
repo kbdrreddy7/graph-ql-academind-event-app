@@ -1,8 +1,9 @@
 node_modules/
-
-**/node_modules/
-
+env.js
 help.git.txt
 
+
+
+**/node_modules/
 **/env.js
 **/nodemon.json
