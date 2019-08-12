@@ -59,3 +59,94 @@ mutation
   }
 }
 
+
+
+lession 6
+############################################
+
+mutation{
+  createUser(userInput:{
+    email:"u2@g.c"
+    password:"123"
+  }){
+    _id
+    email
+    password
+  }
+}
+
+
+----------------------------------------
+
+mutation{
+  createEvent(eventInput:{
+    title:"2 way binding"
+    description:"from gql"
+    price:99.9
+    date:"2019-08-11T07:29:35.631Z"
+  }){
+    title
+    description
+  }
+}
+
+
+
+lession 7
+#########################################
+
+when using populate('creator')  to fetch the foreign key related data
+
+{
+  events{
+    _id
+    title
+    creator{
+      _id
+      email
+    }
+  }
+}
+--------------------------------
+after manual fetching 
+
+
+{
+  events{
+    _id
+    title
+    creator{
+      _id
+      email
+      createdEvents{
+        _id
+        title
+      }
+    }
+  }
+}
+
+---------------------------------
+
+mutation{
+  createEvent(
+    	eventInput:{
+        title:"after depth dynamic relation",
+        description:"sir",
+        price:99.9,
+        date:"2019-08-12T04:24:06.493Z"
+
+        
+      }){
+    _id
+    title
+    creator{
+      _id
+      email
+      createdEvents{
+        _id
+        title
+      }
+    }
+  }
+}

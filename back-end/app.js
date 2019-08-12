@@ -11,7 +11,7 @@ import Event from "./models/event";
 require("./env");
 const express = require("express");
 const cors = require("cors");
-const buildSchema = require("graphql").buildSchema;
+const { buildSchema } = require("graphql");
 const graphqlHTTP = require("express-graphql");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
@@ -27,6 +27,37 @@ app.get("/", function(req, res) {
   res.send("Hello World!");
 });
 
+const events = eventIds => {
+  return Event.find({ _id: { $in: eventIds } })
+    .then(eventsCollection => {
+      return eventsCollection.map(eventRef => {
+        return {
+          ...eventRef._doc,
+          _id: eventRef.id,
+          date: new Date(eventRef._doc.date).toISOString(),
+          creator: user.bind(this, eventRef._doc.creator)
+        };
+      });
+    })
+    .catch(err => {
+      throw err;
+    });
+};
+
+const user = userId => {
+  return User.findById(userId)
+    .then(userRef => {
+      return {
+        ...userRef._doc,
+        _id: userRef.id,
+        createdEvents: events.bind(this, userRef._doc.createdEvents)
+      };
+    })
+    .catch(err => {
+      throw err;
+    });
+};
+
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -38,6 +69,7 @@ app.use(
       description:String!
       price:Float!
       date:String!
+      creator:User!
     }
     input EventInput{
       title:String!
@@ -50,6 +82,7 @@ app.use(
       _id:ID
       email:String!
       password:String
+      createdEvents:[Event!]
     }
  input UserInput{
       email:String!
@@ -71,10 +104,34 @@ app.use(
     `),
     rootValue: {
       events: () => {
+        /* 
+        
+        return Event.find({})
+          .populate("creator")
+          .then(collection => {
+            return collection.map(docRef => {
+              return {
+                ...docRef._doc,
+                _id: docRef._doc._id.toString(),
+                creator: {
+                  ...docRef._doc.creator._doc,
+                  _id: docRef._doc.creator.id
+                }
+              };
+            });
+          })
+
+        */
+
         return Event.find({})
           .then(collection => {
             return collection.map(docRef => {
-              return { ...docRef._doc, _id: docRef._doc._id.toString() };
+              return {
+                ...docRef._doc,
+                _id: docRef._doc._id.toString(),
+                date: new Date(docRef._doc.date).toISOString(),
+                creator: user.bind(this, docRef._doc.creator)
+              };
             });
           })
           .catch(err => {
@@ -105,7 +162,11 @@ app.use(
         return event
           .save()
           .then(eventRef => {
-            createdEvent = { ...eventRef._doc, _id: eventRef.id };
+            createdEvent = {
+              ...eventRef._doc,
+              _id: eventRef.id,
+              creator: user.bind(this, eventRef._doc.creator)
+            };
             return User.findById("5d4fc0f73ace5c2e22e4f944");
           })
           .then(user => {
