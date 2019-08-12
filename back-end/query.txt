@@ -150,3 +150,51 @@ mutation{
     }
   }
 }
+
+
+lession 8
+################################################
+
+mutation{
+  bookEvent(eventId:"5d4fc3fe5e35732eed7b1108"){
+    _id
+    user{
+      _id
+      email
+    }
+    event{
+      _id
+      title
+    }
+  }
+}
+
+------------------------------------------
+
+{
+  bookings{
+    _id
+    event{
+      _id
+      title
+    }
+    user{
+      _id
+      email
+    }
+  }
+}
+
+
+----------------------------------------
+
+mutation{
+  cancelBooking(bookingId:"5d516d0137c29510317852a5"){
+    _id
+		title
+    creator{
+      _id
+      email
+    }
+  }
+}

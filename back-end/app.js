@@ -1,13 +1,3 @@
-/*
- import "./env";
-import express from "express";
-import cors from "cors";
-import { buildSchema } from "graphql";
-import graphqlHTTP from "express-graphql";
-import mongoose from "mongoose";
-
-import Event from "./models/event";
- */
 require("./env");
 const express = require("express");
 const cors = require("cors");
@@ -21,9 +11,7 @@ const app = express();
 
 app.use(cors());
 
-app.get("/", function(req, res) {
-  res.send("Hello World!");
-});
+app.get("/", (req, res) => res.send("Hello World!"));
 
 app.use(
   "/graphql",
