@@ -14,7 +14,9 @@ module.exports = {
       throw err;
     }
   },
-  createEvent: async args => {
+  createEvent: async (args, req) => {
+    if (!req.isAuth) throw new Error("Unauthenticated");
+
     try {
       let { eventInput } = args;
       let event = new Event({
@@ -22,14 +24,14 @@ module.exports = {
         description: eventInput.description,
         price: +eventInput.price,
         date: new Date(eventInput.date),
-        creator: "5d4fc0f73ace5c2e22e4f944"
+        creator: req.userId
       });
 
       let eventRef = await event.save();
 
       let createdEvent = transformEvent(eventRef);
 
-      let userObj = await User.findById("5d4fc0f73ace5c2e22e4f944");
+      let userObj = await User.findById(req.userId);
       if (!userObj) throw Error("User not found");
       userObj.createdEvents.push(event);
       await userObj.save();
@@ -39,12 +41,15 @@ module.exports = {
       throw err;
     }
   },
-  bookEvent: async args => {
+  bookEvent: async (args, req) => {
+    if (!req.isAuth) throw new Error("Unauthenticated");
+
     let fetchedEvent = await Event.findById(args.eventId);
 
     let booking = new Booking({
-      user: "5d4fc0f73ace5c2e22e4f944",
-      event: fetchedEvent
+      user: req.userId, // string (ID)
+      event: fetchedEvent // object in mongo db
+      // both will work as foreign key refs
     });
 
     let bookingRef = await booking.save();

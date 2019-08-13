@@ -7,11 +7,15 @@ const mongoose = require("mongoose");
 const graphQlSchema = require("./graphql/schema");
 const graphResolvers = require("./graphql/resolvers");
 
+const isAuth = require("./middlewares/is-auth");
+
 const app = express();
 
 app.use(cors());
 
 app.get("/", (req, res) => res.send("Hello World!"));
+
+app.use("**", isAuth); // executed for every request
 
 app.use(
   "/graphql",

@@ -10,7 +10,9 @@ module.exports = {
       throw err;
     }
   },
-  cancelBooking: async args => {
+  cancelBooking: async (args, req) => {
+    if (!req.isAuth) throw new Error("Unauthenticated");
+
     try {
       let bookingRef = await Booking.findById(args.bookingId).populate("event");
       let event = transformEvent(bookingRef.event); // transformEvent(bookingRef._doc.event) // both works
