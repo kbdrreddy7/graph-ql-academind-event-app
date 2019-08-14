@@ -1,8 +1,11 @@
 import React, { Component, createRef } from "react";
+import AuthContext from "../context/auth-context";
+
 class Auth extends Component {
   state = {
     isLogin: true
   };
+  static contextType = AuthContext; // then we can acess contaxt directly  like-> this.contaxt
   constructor(props) {
     super(props);
     this.emailEl = createRef();
@@ -66,6 +69,12 @@ class Auth extends Component {
       })
       .then(resData => {
         console.log("resData", resData);
+
+        if (this.state.isLogin) {
+          let { token, userId, tokenExpiration } = resData.data.login;
+
+          this.context.login(token, userId, tokenExpiration);
+        }
       })
       .catch(err => console.log("err ", err));
   };
