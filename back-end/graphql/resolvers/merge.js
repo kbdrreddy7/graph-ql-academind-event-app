@@ -38,6 +38,15 @@ const events = async eventIds => {
   try {
     let eventsCollection = await Event.find({ _id: { $in: eventIds } });
     let events = eventsCollection.map(eventRef => transformEvent(eventRef));
+
+    // sorting events based on eventIds
+    // bcz mongodb o/r eventloader doesn't return events in the eventIds order( what we pass)
+    events.sort((a, b) => {
+      return (
+        eventIds.indexOf(a._id.toString()) - eventIds.indexOf(b._id.toString())
+      );
+    });
+
     return events;
   } catch (err) {
     throw err;
