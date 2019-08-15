@@ -15,7 +15,8 @@ module.exports = {
     }
   },
   createEvent: async (args, req) => {
-    if (!req.isAuth) throw new Error("Unauthenticated");
+    if (process.env.AUTHENTICATE)
+      if (!req.isAuth) throw new Error("Unauthenticated");
 
     try {
       let { eventInput } = args;
@@ -42,7 +43,8 @@ module.exports = {
     }
   },
   bookEvent: async (args, req) => {
-    if (!req.isAuth) throw new Error("Unauthenticated");
+    if (process.env.AUTHENTICATE)
+      if (!req.isAuth) throw new Error("Unauthenticated");
 
     let fetchedEvent = await Event.findById(args.eventId);
 

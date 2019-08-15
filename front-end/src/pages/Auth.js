@@ -1,6 +1,6 @@
 import React, { Component, createRef } from "react";
 import AuthContext from "../context/auth-context";
-
+import "./Auth.css";
 class Auth extends Component {
   state = {
     isLogin: true
@@ -43,16 +43,20 @@ class Auth extends Component {
     if (!this.state.isLogin)
       reqBody = {
         query: `
-            mutation{
+            mutation CreateEvent($email:String!,$pass:String!){
                     createUser(userInput:{
-                                          email:"${email}",
-                                          password:"${password}"
+                                          email:$email,
+                                          password:$pass
                                           })
                                             {
                                               _id
                                               email
                                             }
-                    }`
+                    }`,
+        variables: {
+          email: email,
+          pass: password
+        }
       };
 
     fetch(`http://localhost:5000/graphql`, {
